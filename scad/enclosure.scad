@@ -62,12 +62,22 @@ node_connector_spacing = 28;
 node_connector_length = 38;
 
 module node_mcu() {
+    // pcb
     cube([node_length, node_width, 1.5]);
+    // pins
     translate([3, 0, -3]) cube([node_connector_length, 2.5, 30]);
     translate([3, node_width - 2.5, -3]) cube([node_connector_length, 2.5, 30]);
-    translate([0, 5.5, -5]) cube([node_length, 18.5, 5]);
+    // components
+    translate([0, 5.5, -3]) cube([20, 18.5, 3]);
+    translate([20, 5.5, -5]) cube([node_length - 20, 18.5, 5]);
+    // usb port
     translate([-10, node_width/2 - 5, -2]) cube([10,10, 2]);
+}
 
+// nodemcu bottom support
+module node_bottom_support() {
+    cube([lcd_pcb_width, 5, 2]);
+    translate([23, 0, 0]) cube([20, 30, 2]);
 }
 
 /* node_mcu(); */
@@ -79,7 +89,13 @@ difference() {
     // carving up the inside
     translate([thickness, thickness, thickness])
         cube([width - thickness * 2, height - thickness * 2, depth]);
+    translate([lcd_pcb_width + (width - lcd_pcb_width)/2, lcd_pcb_offset, 4,]) rotate([0, 180, 0]) ilI9341();
+    translate([51, 45, 10]) rotate([0, 0, 180]) node_mcu();
+}
+
+difference() {
+    translate([5, 9, 6]) node_bottom_support();
     # translate([lcd_pcb_width + (width - lcd_pcb_width)/2, lcd_pcb_offset, 4,]) rotate([0, 180, 0]) ilI9341();
-    # translate([50.5, 45, 10]) rotate([0, 0, 180]) node_mcu();
+    translate([51, 45, 10]) rotate([0, 0, 180]) node_mcu();
 }
 
