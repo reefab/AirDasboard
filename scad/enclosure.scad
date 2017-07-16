@@ -74,10 +74,14 @@ module node_mcu() {
     translate([-10, node_width/2 - 5, -2]) cube([10,10, 2]);
 }
 
-// nodemcu bottom support
 module node_bottom_support() {
     cube([lcd_pcb_width, 5, 2]);
     translate([23, 0, 0]) cube([20, 30, 2]);
+}
+
+module node_top_support() {
+    cube([lcd_pcb_width + 2, 40, 2]);
+    translate([0, 0, -3.5]) cube([lcd_pcb_width, 4, 3.5]);
 }
 
 /* node_mcu(); */
@@ -89,13 +93,19 @@ difference() {
     // carving up the inside
     translate([thickness, thickness, thickness])
         cube([width - thickness * 2, height - thickness * 2, depth]);
+    # translate([lcd_pcb_width + (width - lcd_pcb_width)/2, lcd_pcb_offset, 4,]) rotate([0, 180, 0]) ilI9341();
+    # translate([51, 45, 10]) rotate([0, 0, 180]) node_mcu();
+}
+
+difference() {
+    translate([5, 9, 6]) node_bottom_support();
     translate([lcd_pcb_width + (width - lcd_pcb_width)/2, lcd_pcb_offset, 4,]) rotate([0, 180, 0]) ilI9341();
     translate([51, 45, 10]) rotate([0, 0, 180]) node_mcu();
 }
 
 difference() {
-    translate([5, 9, 6]) node_bottom_support();
-    # translate([lcd_pcb_width + (width - lcd_pcb_width)/2, lcd_pcb_offset, 4,]) rotate([0, 180, 0]) ilI9341();
+    translate([5, 9, 11.5]) node_top_support();
+    translate([lcd_pcb_width + (width - lcd_pcb_width)/2, lcd_pcb_offset, 4,]) rotate([0, 180, 0]) ilI9341();
     translate([51, 45, 10]) rotate([0, 0, 180]) node_mcu();
 }
 
