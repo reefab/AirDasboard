@@ -1,6 +1,6 @@
 width = 53;
 height = 85;
-depth = 10;
+depth = 13.5;
 thickness = 2;
 clearance = 0.2;
 
@@ -108,4 +108,17 @@ difference() {
     translate([lcd_pcb_width + (width - lcd_pcb_width)/2, lcd_pcb_offset, 4,]) rotate([0, 180, 0]) ilI9341();
     translate([51, 45, 10]) rotate([0, 0, 180]) node_mcu();
 }
+
+module top_case() {
+    rotate([0, -90, 0]) {
+        difference() {
+            linear_extrude(height = width)
+                polygon([[0, 0], [0, height], [35, 10]]);
+            translate([0, 0, thickness]) # linear_extrude(height = width - thickness * 2)
+                polygon([[0, 2], [0, height - 2], [33, 11]]);
+        }
+    }
+}
+
+translate([width, 0, 13.5]) top_case();
 
