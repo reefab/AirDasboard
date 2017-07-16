@@ -87,38 +87,95 @@ module node_top_support() {
 /* node_mcu(); */
 /* ilI9341(); */
 
-difference() {
-    // enclosure
-    cube([width, height, depth]);
-    // carving up the inside
-    translate([thickness, thickness, thickness])
-        cube([width - thickness * 2, height - thickness * 2, depth]);
-    # translate([lcd_pcb_width + (width - lcd_pcb_width)/2, lcd_pcb_offset, 4,]) rotate([0, 180, 0]) ilI9341();
-    # translate([51, 45, 10]) rotate([0, 0, 180]) node_mcu();
-}
+/* difference() { */
+/*     // enclosure */
+/*     cube([width, height, depth]); */
+/*     // carving up the inside */
+/*     translate([thickness, thickness, thickness]) */
+/*         cube([width - thickness * 2, height - thickness * 2, depth]); */
+/*     # translate([lcd_pcb_width + (width - lcd_pcb_width)/2, lcd_pcb_offset, 4,]) rotate([0, 180, 0]) ilI9341(); */
+/*     # translate([51, 45, 10]) rotate([0, 0, 180]) node_mcu(); */
+/* } */
 
-difference() {
-    translate([5, 9, 6]) node_bottom_support();
-    translate([lcd_pcb_width + (width - lcd_pcb_width)/2, lcd_pcb_offset, 4,]) rotate([0, 180, 0]) ilI9341();
-    translate([51, 45, 10]) rotate([0, 0, 180]) node_mcu();
-}
+/* difference() { */
+/*     translate([5, 9, 6]) node_bottom_support(); */
+/*     translate([lcd_pcb_width + (width - lcd_pcb_width)/2, lcd_pcb_offset, 4,]) rotate([0, 180, 0]) ilI9341(); */
+/*     translate([51, 45, 10]) rotate([0, 0, 180]) node_mcu(); */
+/* } */
 
-difference() {
-    translate([5, 9, 11.5]) node_top_support();
-    translate([lcd_pcb_width + (width - lcd_pcb_width)/2, lcd_pcb_offset, 4,]) rotate([0, 180, 0]) ilI9341();
-    translate([51, 45, 10]) rotate([0, 0, 180]) node_mcu();
-}
+/* difference() { */
+/*     translate([5, 9, 11.5]) node_top_support(); */
+/*     translate([lcd_pcb_width + (width - lcd_pcb_width)/2, lcd_pcb_offset, 4,]) rotate([0, 180, 0]) ilI9341(); */
+/*     translate([51, 45, 10]) rotate([0, 0, 180]) node_mcu(); */
+/* } */
 
 module top_case() {
-    rotate([0, -90, 0]) {
-        difference() {
+    difference() {
+        union() {
             linear_extrude(height = width)
                 polygon([[0, 0], [0, height], [35, 10]]);
-            translate([0, 0, thickness]) # linear_extrude(height = width - thickness * 2)
-                polygon([[0, 2], [0, height - 2], [33, 11]]);
+            difference() {
+                translate([40, 5, 5]) rotate([0, -90, 0]) {
+                    for(i=[-1,1]) translate([lcd_pcb_width/2 - i * lcd_hole_spacing_x/2, lcd_pcb_height -2.5, 0]) {
+                        cylinder(d=6.5, h=40, $fn=20);
+                    }
+                    for(i=[-1,1]) translate([lcd_pcb_width/2 - i * lcd_hole_spacing_x/2, 6.5, 0]) {
+                        cylinder(d=6.5, h=40, $fn=20);
+                    }
+                }
+                linear_extrude(height = width) polygon([ [0,0], [35, 10], [0, height], [50, height], [50, 0]]);
+            }
+        }
+        translate([0, 0, thickness]) linear_extrude(height = width - thickness * 2)
+            polygon([[0, 2], [0, height - 2], [33, 11]]);
+        translate([40, 5, 5]) rotate([0, -90, 0]) {
+            for(i=[-1,1]) {
+                translate([lcd_pcb_width/2 - i * lcd_hole_spacing_x/2, lcd_pcb_height -2.5, 0])
+                    cylinder(d=5.5, h=40, $fn=20);
+                translate([lcd_pcb_width/2 - i * lcd_hole_spacing_x/2, 6.5, 0])
+                    cylinder(d=5.5, h=40, $fn=20);
+            }
+        }
+    }
+    difference() {
+    translate([40, 5, 5]) rotate([0, -90, 0]) {
+        difference() {
+            for(i=[-1,1]) {
+                translate([lcd_pcb_width/2 - i * lcd_hole_spacing_x/2, lcd_pcb_height -2.5, 0])
+                    cylinder(d=6.5, h=40, $fn=20);
+                translate([lcd_pcb_width/2 - i * lcd_hole_spacing_x/2, 6.5, 0])
+                    cylinder(d=6.5, h=40, $fn=20);
+            }
+            for(i=[-1,1]) {
+                translate([lcd_pcb_width/2 - i * lcd_hole_spacing_x/2, lcd_pcb_height -2.5, 0])
+                    cylinder(d=5.5, h=40, $fn=20);
+                translate([lcd_pcb_width/2 - i * lcd_hole_spacing_x/2, 6.5, 0])
+                    cylinder(d=5.5, h=40, $fn=20);
+            }
+        }
+    }
+    linear_extrude(height = width) polygon([ [0,0], [35, 10], [0, height], [50, height], [50, 0]]);
+    }
+    translate([2, 5, 5]) rotate([0, -90, 0]) {
+        difference() {
+            for(i=[-1,1]) {
+                translate([lcd_pcb_width/2 - i * lcd_hole_spacing_x/2, lcd_pcb_height -2.5, 0])
+                    cylinder(d=6.5, h=2, $fn=20);
+                translate([lcd_pcb_width/2 - i * lcd_hole_spacing_x/2, 6.5, 0])
+                    cylinder(d=6.5, h=2, $fn=20);
+            }
+            for(i=[-1,1]) {
+                translate([lcd_pcb_width/2 - i * lcd_hole_spacing_x/2, lcd_pcb_height -2.5, 0])
+                    cylinder(d=3.5, h=2, $fn=20);
+                translate([lcd_pcb_width/2 - i * lcd_hole_spacing_x/2, 6.5, 0])
+                    cylinder(d=3.5, h=2, $fn=20);
+            }
         }
     }
 }
+/* polygon([ [0,0], [35, 10], [0, height], [50, height], [50, 0]]); */
 
-translate([width, 0, 13.5]) top_case();
+
+/* translate([width, 0, 13.5]) */ 
+top_case();
 
