@@ -38,9 +38,10 @@
 #include <GxIO/GxIO.cpp>
 
 // FreeFonts from Adafruit_GFX
-#include <Fonts/FreeMonoBold9pt7b.h>
+#include <Fonts/FreeSansBold9pt7b.h>
+#include <Fonts/FreeSansBold12pt7b.h>
 
-#include GxEPD_BitmapExamples
+/* #include GxEPD_BitmapExamples */
 
 #if defined(ESP8266)
 
@@ -156,6 +157,9 @@ typedef struct {
 
 STATS stats;
 
+const GFXfont* bigFont = &FreeSansBold12pt7b;
+const GFXfont* smallFont = &FreeSansBold9pt7b;
+
 void updateStats() {
     char url[100];
     sprintf(url, "http://api.foobot.io/v2/device/%s/datapoint/3600/last/3600/", foobot_device_id);
@@ -187,22 +191,85 @@ void updateStats() {
 }
 
 void showStats() {
-    const GFXfont* f = &FreeMonoBold9pt7b;
     display.fillScreen(GxEPD_WHITE);
     display.setTextColor(GxEPD_BLACK);
-    display.setFont(f);
-    display.setCursor(0, 0);
-    display.println("Air Quality");
-    display.print("PM2.5:");
-    display.setTextColor(GxEPD_RED);
-    display.print(stats.pm);
-    display.setTextColor(GxEPD_BLACK);
-    display.println("ugm3");
-    display.print("global:");
-    display.setTextColor(GxEPD_RED);
-    display.print(stats.global);
-    display.setTextColor(GxEPD_BLACK);
+
+    // Header
+    display.setFont(bigFont);
+    display.setCursor(0, 25);
+    display.print("Pollution");
+    display.setCursor(125, 25);
+    if (stats.global > 50) {
+        display.setTextColor(GxEPD_RED);
+    }
+    display.print(stats.global, 0);
     display.println("%");
+
+    // Horizontal separator
+    for(int i = 0; i < 5; i++) {
+        display.drawLine(0, 40 + i, 200, 40 + i, GxEPD_RED);
+    }
+
+    // Stats names colunm
+    display.setTextColor(GxEPD_BLACK);
+    display.setFont(smallFont);
+    display.setCursor(0, 60);
+    display.println("PM2.5");
+    display.println("Temp");
+    display.println("Hum");
+    display.println("Co2");
+    display.println("Voc");
+
+    // Vertical separator
+    for(int i = 0; i < 5; i++) {
+        display.drawLine(60 + i, 41, 60 + i, 180, GxEPD_RED);
+    }
+
+    // First stats column
+    display.setCursor(70, 60);
+    display.setTextColor(GxEPD_BLACK);
+    if (stats.pm > 50) {
+        display.setTextColor(GxEPD_RED);
+    }
+    display.println(stats.pm, 0);
+
+    display.setCursor(70, 80);
+    display.setTextColor(GxEPD_BLACK);
+    if (stats.temp > 25) {
+        display.setTextColor(GxEPD_RED);
+    }
+    display.print(stats.temp, 0);
+    display.println("C");
+
+    display.setCursor(70, 100);
+    display.setTextColor(GxEPD_BLACK);
+    if (stats.humidity > 60 || stats.humidity < 40) {
+        display.setTextColor(GxEPD_RED);
+    }
+    display.print(stats.humidity, 0);
+    display.println("%");
+
+    display.setCursor(70, 120);
+    display.setTextColor(GxEPD_BLACK);
+    if (stats.co2 > 1300) {
+        display.setTextColor(GxEPD_RED);
+    }
+    display.println(stats.co2, 0);
+
+    display.setCursor(70, 140);
+    if (stats.voc > 300) {
+        display.setTextColor(GxEPD_RED);
+    }
+    display.println(stats.voc, 0);
+
+    // Horizontal separator
+    for(int i = 0; i < 5; i++) {
+        display.drawLine(0, 180 + i, 200, 180 + i, GxEPD_RED);
+    }
+    // Footer
+    display.setCursor(0, 200);
+    display.setTextColor(GxEPD_BLACK);
+    display.setFont(smallFont);
     display.println(stats.localTime);
 }
 
@@ -211,9 +278,9 @@ void updateStatsAndDisplay() {
     display.drawPaged(showStats);
 }
 
-
 void setup(void) {
   display.init();
+  display.setRotation(3);
   Serial.begin(9600);
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
