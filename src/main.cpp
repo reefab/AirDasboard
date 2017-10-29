@@ -131,47 +131,101 @@ GxEPD_Class display(io);
 
 #endif
 
+#include "config.h"
 
-//#define DEMO_DELAY 3*60 // seconds
-//#define DEMO_DELAY 1*60 // seconds
-#define DEMO_DELAY 10
+#include <ESP8266WiFi.h>          //ESP8266 Core WiFi Library
+#include <ESP8266HTTPClient.h>
 
-void showFontCallback()
-{
-  const char* name = "FreeMonoBold9pt7b";
-  const GFXfont* f = &FreeMonoBold9pt7b;
-  display.fillScreen(GxEPD_WHITE);
-  display.setTextColor(GxEPD_BLACK);
-  display.setFont(f);
-  display.setCursor(0, 0);
-  display.println();
-  display.println(name);
-  display.println(" !\"#$%&'()*+,-./");
-  display.println("0123456789:;<=>?");
-  display.println("@ABCDEFGHIJKLMNO");
-  display.println("PQRSTUVWXYZ[\\]^_");
-#if defined(_GxGDEW0154Z04_H_) || defined(_GxGDEW0213Z16_H_) || defined(_GxGDEW029Z10_H_) || defined(_GxGDEW027C44_H_)
-  display.setTextColor(GxEPD_RED);
-#endif
-  display.println("`abcdefghijklmno");
-  display.println("pqrstuvwxyz{|}~ ");
+HTTPClient http;
+
+int nbRequests = 0;
+
+#include <SimpleTimer.h>
+SimpleTimer timer;
+
+typedef struct {
+    unsigned long timestamp;
+    String localTime;
+    float pm;
+    float temp;
+    float humidity;
+    float co2;
+    float voc;
+    float global;
+} STATS;
+
+STATS stats;
+
+void updateStats() {
+    char url[100];
+    sprintf(url, "http://api.foobot.io/v2/device/%s/datapoint/3600/last/3600/", foobot_device_id);
+    http.begin(url);
+    http.addHeader("Accept", " text/csv;charset=UTF-8");
+    http.addHeader("X-API-KEY-TOKEN", foobot_api_token);
+    int httpCode = http.GET();
+    nbRequests++;
+    if (httpCode > 0) {
+        String payload = http.getString();
+        int payloadLength = payload.length() + 1;
+        char charbuf[payloadLength];
+        payload.toCharArray(charbuf, payloadLength);
+        char* header_line = strtok(charbuf, "\n");
+        char* stats_line = strtok(NULL, "\n");
+        Serial.println(stats_line);
+        stats.timestamp = atoi(strtok(stats_line, ","));
+        stats.localTime = strtok(NULL, ",");
+        stats.pm = atof(strtok(NULL, ","));
+        stats.temp = atof(strtok(NULL, ","));
+        stats.humidity = atof(strtok(NULL, ","));
+        stats.co2 = atof(strtok(NULL, ","));
+        stats.voc = atof(strtok(NULL, ","));
+        stats.global = atof(strtok(NULL, ","));
+    }
+    Serial.print("NB request:");
+    Serial.println(nbRequests);
+    http.end();
+}
+
+void showStats() {
+    const GFXfont* f = &FreeMonoBold9pt7b;
+    display.fillScreen(GxEPD_WHITE);
+    display.setTextColor(GxEPD_BLACK);
+    display.setFont(f);
+    display.setCursor(0, 0);
+    display.println("Air Quality");
+    display.print("PM2.5:");
+    display.setTextColor(GxEPD_RED);
+    display.print(stats.pm);
+    display.setTextColor(GxEPD_BLACK);
+    display.println("ugm3");
+    display.print("global:");
+    display.setTextColor(GxEPD_RED);
+    display.print(stats.global);
+    display.setTextColor(GxEPD_BLACK);
+    display.println("%");
+    display.println(stats.localTime);
+}
+
+void updateStatsAndDisplay() {
+    updateStats();
+    display.drawPaged(showStats);
 }
 
 
-void setup(void)
-{
+void setup(void) {
   display.init();
+  Serial.begin(9600);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.print("Connecting..");
+  }
+
+  updateStatsAndDisplay();
+  timer.setInterval(600 * 1000, updateStatsAndDisplay);
 }
 
-void loop()
-{
-#if defined(_GxGDEW0154Z04_H_) || defined(_GxGDEW0213Z16_H_) || defined(_GxGDEW029Z10_H_)
-  display.drawExamplePicture(BitmapExample1, BitmapExample2, sizeof(BitmapExample1), sizeof(BitmapExample2));
-#else
-  display.drawExampleBitmap(BitmapExample1, sizeof(BitmapExample1));
-#endif
-  delay(DEMO_DELAY * 1000);
-  display.drawPaged(showFontCallback);
-  delay(DEMO_DELAY * 1000);
+void loop() {
+    timer.run();
 }
 
