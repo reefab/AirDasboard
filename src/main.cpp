@@ -278,21 +278,26 @@ void updateStatsAndDisplay() {
     display.drawPaged(showStats);
 }
 
-void setup(void) {
-  display.init();
-  display.setRotation(3);
-  Serial.begin(9600);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.print("Connecting..");
-  }
+void connect() {
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(1000);
+        Serial.print("Connecting..");
+    }
+}
 
-  updateStatsAndDisplay();
-  timer.setInterval(600 * 1000, updateStatsAndDisplay);
+void setup(void) {
+    display.init();
+    display.setRotation(3);
+    Serial.begin(9600);
+
+    connect();
+    updateStatsAndDisplay();
+    /* timer.setInterval(600 * 1000, updateStatsAndDisplay); */
+    ESP.deepSleep(600e6);
 }
 
 void loop() {
-    timer.run();
+    /* timer.run(); */
 }
 
