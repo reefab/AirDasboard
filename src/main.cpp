@@ -32,7 +32,7 @@ SimpleTimer timer;
 typedef struct {
     unsigned long timestamp = 0;
     String localTime = "Never";
-    float pm = 0;
+    float pm25 = 0;
     float temp = 0;
     float humidity = 0;
     float co2 = 0;
@@ -44,6 +44,24 @@ FoobotStats indoorStats;
 
 #include "foobot.h"
 
+typedef struct {
+    unsigned long timestamp = 0;
+    String localTime = "Never";
+    float pm25 = 0;
+    float pm10 = 0;
+    float temp = 0;
+    float humidity = 0;
+    float co = 0;
+    float so2 = 0;
+    float o3 = 0;
+    float no2 = 0;
+    float global = 0;
+} AqicnStats;
+
+AqicnStats outdoorStats;
+
+#include "aqicn.h"
+
 const GFXfont* bigFont = &FreeSansBold18pt7b;
 const GFXfont* mediumFont = &FreeSansBold12pt7b;
 const GFXfont* smallFont = &FreeSansBold9pt7b;
@@ -51,7 +69,8 @@ const GFXfont* smallFont = &FreeSansBold9pt7b;
 #include "display.h"
 
 void updateStatsAndDisplay() {
-    updateStats();
+    updateFoobotStats();
+    updateAqicnStats();
     display.drawPaged(showStats);
 }
 

@@ -1,4 +1,4 @@
-void updateStats() {
+void updateFoobotStats() {
     char url[100];
     sprintf(url, "http://api.foobot.io/v2/device/%s/datapoint/3600/last/3600/",
             foobot_device_id);
@@ -7,7 +7,7 @@ void updateStats() {
     http.addHeader("X-API-KEY-TOKEN", foobot_api_token);
     int httpCode = http.GET();
     nbRequests++;
-    if (httpCode > 0) {
+    if (httpCode == 200) {
         String payload = http.getString();
         int payloadLength = payload.length() + 1;
         char charbuf[payloadLength];
@@ -17,7 +17,7 @@ void updateStats() {
         Serial.println(stats_line);
         indoorStats.timestamp = atoi(strtok(stats_line, ","));
         indoorStats.localTime = strtok(NULL, ",");
-        indoorStats.pm = atof(strtok(NULL, ","));
+        indoorStats.pm25 = atof(strtok(NULL, ","));
         indoorStats.temp = atof(strtok(NULL, ","));
         indoorStats.humidity = atof(strtok(NULL, ","));
         indoorStats.co2 = atof(strtok(NULL, ","));
