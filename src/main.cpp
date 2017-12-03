@@ -26,13 +26,14 @@
 #include <GxEPD.h>
 
 //#include <GxGDEP015OC1/GxGDEP015OC1.cpp>    // 1.54" b/w
-#include <GxGDEW0154Z04/GxGDEW0154Z04.cpp>  // 1.54" b/w/r
+//#include <GxGDEW0154Z04/GxGDEW0154Z04.cpp>  // 1.54" b/w/r
 //#include <GxGDE0213B1/GxGDE0213B1.cpp>      // 2.13" b/w
 //#include <GxGDEW0213Z16/GxGDEW0213Z16.cpp>  // 2.13" b/w/r
 //#include <GxGDEH029A1/GxGDEH029A1.cpp>      // 2.9" b/w
 //#include <GxGDEW029Z10/GxGDEW029Z10.cpp>    // 2.9" b/w/r
 //#include <GxGDEW027C44/GxGDEW027C44.cpp>    // 2.7" b/w/r
 //#include <GxGDEW042T2/GxGDEW042T2.cpp>      // 4.2" b/w
+#include <GxGDEW042Z15/GxGDEW042Z15.cpp>      // 4.2" b/w/r
 
 #include <GxIO/GxIO_SPI/GxIO_SPI.cpp>
 #include <GxIO/GxIO.cpp>
@@ -40,6 +41,7 @@
 // FreeFonts from Adafruit_GFX
 #include <Fonts/FreeSansBold9pt7b.h>
 #include <Fonts/FreeSansBold12pt7b.h>
+#include <Fonts/FreeSansBold18pt7b.h>
 
 /* #include GxEPD_BitmapExamples */
 
@@ -157,7 +159,8 @@ typedef struct {
 
 STATS stats;
 
-const GFXfont* bigFont = &FreeSansBold12pt7b;
+const GFXfont* bigFont = &FreeSansBold18pt7b;
+const GFXfont* mediumFont = &FreeSansBold12pt7b;
 const GFXfont* smallFont = &FreeSansBold9pt7b;
 
 void updateStats() {
@@ -207,22 +210,26 @@ void showStats() {
 
     // Horizontal separator
     for(int i = 0; i < 5; i++) {
-        display.drawLine(0, 40 + i, 200, 40 + i, GxEPD_RED);
+        display.drawLine(0, 40 + i, 400, 40 + i, GxEPD_RED);
     }
 
     // Stats names colunm
     display.setTextColor(GxEPD_BLACK);
-    display.setFont(smallFont);
+    display.setFont(mediumFont);
     display.setCursor(0, 60);
     display.println("PM2.5");
+    display.setCursor(0, 80);
     display.println("Temp");
+    display.setCursor(0, 100);
     display.println("Hum");
+    display.setCursor(0, 120);
     display.println("Co2");
+    display.setCursor(0, 140);
     display.println("Voc");
 
     // Vertical separator
-    for(int i = 0; i < 5; i++) {
-        display.drawLine(60 + i, 41, 60 + i, 180, GxEPD_RED);
+    for(int i = 0; i < 3; i++) {
+        display.drawLine(60 + i, 41, 60 + i, 280, GxEPD_RED);
     }
 
     // First stats column
@@ -264,10 +271,10 @@ void showStats() {
 
     // Horizontal separator
     for(int i = 0; i < 5; i++) {
-        display.drawLine(0, 180 + i, 200, 180 + i, GxEPD_RED);
+        display.drawLine(0, 280 + i, 400, 280 + i, GxEPD_RED);
     }
     // Footer
-    display.setCursor(0, 200);
+    display.setCursor(0, 300);
     display.setTextColor(GxEPD_BLACK);
     display.setFont(smallFont);
     display.println(stats.localTime);
@@ -288,7 +295,7 @@ void connect() {
 
 void setup(void) {
     display.init();
-    display.setRotation(3);
+    display.setRotation(4);
     Serial.begin(9600);
 
     connect();
