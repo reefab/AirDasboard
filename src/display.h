@@ -1,9 +1,36 @@
 const int height = 300;
 const int width = 400;
+const int statsStartsAt = 65;
 
-const byte columnWidth = 90;
+const byte columnWidth = 100;
 const byte lineHeight = 20;
 const byte lineSpacing = 10;
+const byte thinSeparator = 2;
+const byte thickSeparator = 5;
+
+void addLabel(String text, int *px, int *py) {
+    display.setCursor(*px, *py);
+    display.println(text);
+    *py += lineHeight + lineSpacing;
+}
+
+void addValue(float value, int *px, int *py, int min = 0, int max = 0, String suffix = "") {
+    display.setCursor(*px, *py);
+    if (min && value < min) {
+        display.setTextColor(GxEPD_RED);
+    } else if (max && value > max) {
+        display.setTextColor(GxEPD_RED);
+    } else {
+        display.setTextColor(GxEPD_BLACK);
+    }
+    display.print(value, 0);
+    if (suffix.length() > 0) {
+        display.setFont(smallFont);
+        display.println(suffix);
+        display.setFont(mediumFont);
+    }
+    *py += lineHeight + lineSpacing;
+}
 
 void showStats() {
     display.fillScreen(GxEPD_WHITE);
@@ -11,173 +38,84 @@ void showStats() {
 
     // Header
     display.setFont(bigFont);
-    display.setCursor(0, 25);
-    display.print("Pollution");
-    display.setCursor(180, 25);
+    display.setCursor(5, 25);
+    /* display.print("Pollution - "); */
     display.print("In: ");
     if (indoorStats.global > 50) {
         display.setTextColor(GxEPD_RED);
     }
     display.print(indoorStats.global, 0);
-    display.println("%");
+    display.print("%");
+
+    display.setCursor(width/2 + 5, 25);
+    display.setTextColor(GxEPD_BLACK);
+    display.print("Out: ");
+    if (outdoorStats.global > 150) {
+        display.setTextColor(GxEPD_RED);
+    } else {
+        display.setTextColor(GxEPD_BLACK);
+    }
+    display.print(outdoorStats.global, 0);
 
     // Horizontal separator
-    for(int i = 0; i < 5; i++) {
+    for(int i = 0; i < thickSeparator; i++) {
         display.drawLine(0, 40 + i, width, 40 + i, GxEPD_RED);
     }
 
-    // indoorStats names colunm
+    // Vertical separators
+    for(int j = 1; j < 4; j++) {
+        int separator = (j == 2) ? thickSeparator : thinSeparator;
+        int verticalStart = (j == 2) ? 0 : 41;
+        for(int i = 0; i < separator; i++) {
+            display.drawLine(columnWidth * j + i, verticalStart,
+                             columnWidth * j + i, height - 20,
+                             GxEPD_RED);
+        }
+    }
+
+    // indoor Stats names colunm
     int x = 5;
-    int y = 80;
+    int y = statsStartsAt;
     display.setTextColor(GxEPD_BLACK);
     display.setFont(mediumFont);
-    display.setCursor(x, y);
-    display.println("Temp");
-    y += lineHeight + lineSpacing;
-    display.setCursor(x, y);
-    y += lineHeight + lineSpacing;
-    display.setCursor(x, y);
-    display.println("Hum");
-    y += lineHeight + lineSpacing;
-    display.setCursor(x, y);
-    display.println("PM2.5");
-    y += lineHeight + lineSpacing;
-    display.setCursor(x, y);
-    display.println("Co2");
-    y += lineHeight + lineSpacing;
-    display.setCursor(x, y);
-    display.println("Voc");
 
-    // Vertical separator
-    for(int i = 0; i < 2; i++) {
-        display.drawLine(columnWidth + i, 41, columnWidth + i, height - 20,
-                         GxEPD_RED);
+    const char* indoorLabels[] = {"Temp", "Hum", "PM2.5", "Co2", "Voc"};
+    for (int i = 0; i < 5; i++) {
+        addLabel(indoorLabels[i], &x, &y);
     }
+
 
     // First indoorStats column
     x = columnWidth + 5;
-    y = 80;
-    display.setCursor(x, y);
-    display.setTextColor(GxEPD_BLACK);
-    if (indoorStats.temp > 25) {
-        display.setTextColor(GxEPD_RED);
-    }
-    display.print(indoorStats.temp, 0);
-    display.println("C");
-    y += lineHeight + lineSpacing;
-
-    display.setCursor(x, y);
-    display.setTextColor(GxEPD_BLACK);
-    if (indoorStats.humidity > 60 || indoorStats.humidity < 40) {
-        display.setTextColor(GxEPD_RED);
-    }
-    display.print(indoorStats.humidity, 0);
-    display.println("%");
-    y += lineHeight + lineSpacing;
-
-    display.setCursor(x, y);
-    display.setTextColor(GxEPD_BLACK);
-    if (indoorStats.pm25 > 50) {
-        display.setTextColor(GxEPD_RED);
-    }
-    display.println(indoorStats.pm25, 0);
-    y += lineHeight + lineSpacing;
-
-    display.setCursor(x, y);
-    display.setTextColor(GxEPD_BLACK);
-    if (indoorStats.co2 > 1300) {
-        display.setTextColor(GxEPD_RED);
-    }
-    display.println(indoorStats.co2, 0);
-    y += lineHeight + lineSpacing;
-
-    display.setCursor(x, y);
-    if (indoorStats.voc > 300) {
-        display.setTextColor(GxEPD_RED);
-    }
-    display.println(indoorStats.voc, 0);
-
-
-    // Vertical separator
-    for(int i = 0; i < 2; i++) {
-        display.drawLine(columnWidth * 2 + i, 41, columnWidth * 2 + i, height - 20,
-                         GxEPD_RED);
-    }
+    y = statsStartsAt;
+    addValue(indoorStats.temp, &x, &y, 0, 25, "C");
+    addValue(indoorStats.humidity, &x, &y, 40, 60, "%");
+    addValue(indoorStats.pm25, &x, &y, 0, 50, "ugm3");
+    addValue(indoorStats.co2, &x, &y, 0, 1300, "ppm");
+    addValue(indoorStats.voc, &x, &y, 0, 300, "ppb");
 
     // outdoor stats names colunm
     x = columnWidth * 2 + 5;
-    y = 80;
+    y = statsStartsAt;
     display.setTextColor(GxEPD_BLACK);
-    display.setFont(mediumFont);
-    display.setCursor(x, y);
-    display.println("Temp");
-    y += lineHeight + lineSpacing;
-    display.setCursor(x, y);
-    display.println("Hum");
-    y += lineHeight + lineSpacing;
-    display.setCursor(x, y);
-    y += lineHeight + lineSpacing;
-    display.setCursor(x, y);
-    display.println("PM2.5");
-    y += lineHeight + lineSpacing;
-    display.setCursor(x, y);
-    display.println("PM1x");
-    y += lineHeight + lineSpacing;
-    display.setCursor(x, y);
-    display.println("CO");
-    y += lineHeight + lineSpacing;
-    display.setCursor(x, y);
-    display.println("SO2");
-    y += lineHeight + lineSpacing;
-    display.setCursor(x, y);
-    display.println("Ozone");
-    y += lineHeight + lineSpacing;
-    display.setCursor(x, y);
-    display.println("NO2");
-    y += lineHeight + lineSpacing;
+
+    const char* outdoorLabels[] = {"Temp", "Hum", "PM2.5", "PM10", "CO", "Ozone",
+                                   "No2", "So2"};
+    for (int i = 0; i < 8; i++) {
+        addLabel(outdoorLabels[i], &x, &y);
+    }
 
     // Second column: outdoor stats
     x = columnWidth * 3 + 5;
-    y = 80;
-    display.setCursor(x, y);
-    display.setTextColor(GxEPD_BLACK);
-    if (outdoorStats.pm25 > 50) {
-        display.setTextColor(GxEPD_RED);
-    }
-    display.println(outdoorStats.pm25, 0);
-    y += lineHeight + lineSpacing;
-
-    display.setTextColor(GxEPD_BLACK);
-
-    display.setCursor(x, y);
-    display.print(outdoorStats.temp, 0);
-    display.println("C");
-    y += lineHeight + lineSpacing;
-
-    display.setCursor(x, y);
-    display.print(outdoorStats.humidity, 0);
-    display.println("%");
-    y += lineHeight + lineSpacing;
-
-    display.setCursor(x, y);
-    display.println(outdoorStats.pm10, 0);
-    y += lineHeight + lineSpacing;
-
-    display.setCursor(x, y);
-    display.println(outdoorStats.co, 0);
-    y += lineHeight + lineSpacing;
-
-    display.setCursor(x, y);
-    display.println(outdoorStats.so2, 0);
-    y += lineHeight + lineSpacing;
-
-    display.setCursor(x, y);
-    display.println(outdoorStats.o3, 0);
-    y += lineHeight + lineSpacing;
-
-    display.setCursor(x, y);
-    display.println(outdoorStats.no2, 0);
-    y += lineHeight + lineSpacing;
+    y = statsStartsAt;
+    addValue(outdoorStats.temp, &x, &y, 0, 0, "C");
+    addValue(outdoorStats.humidity, &x, &y, 0, 0, "%");
+    addValue(outdoorStats.pm25, &x, &y, 0, 0, "ugm3");
+    addValue(outdoorStats.pm10, &x, &y, 0, 0, "ugm3");
+    addValue(outdoorStats.co, &x, &y);
+    addValue(outdoorStats.o3, &x, &y);
+    addValue(outdoorStats.no2, &x, &y);
+    addValue(outdoorStats.so2, &x, &y);
 
     // Horizontal separator
     for(int i = 0; i < 5; i++) {
@@ -185,7 +123,7 @@ void showStats() {
     }
 
     // Footer
-    display.setCursor(0, height);
+    display.setCursor(0, height - 1);
     display.setTextColor(GxEPD_BLACK);
     display.setFont(smallFont);
     display.println(indoorStats.localTime);
