@@ -47,7 +47,7 @@ void showStats() {
     display.print(indoorStats.global, 0);
     display.print("%");
 
-    display.setCursor(width/2 + 5, 25);
+    display.setCursor(width/2 + 10, 25);
     display.setTextColor(GxEPD_BLACK);
     display.print("Out: ");
     if (outdoorStats.global > 150) {
@@ -73,7 +73,7 @@ void showStats() {
         }
     }
 
-    // indoor Stats names colunm
+    // First column: indoor Stats names
     int x = 5;
     int y = statsStartsAt;
     display.setTextColor(GxEPD_BLACK);
@@ -85,7 +85,7 @@ void showStats() {
     }
 
 
-    // First indoorStats column
+    // Second column: indoor stats values
     x = columnWidth + 5;
     y = statsStartsAt;
     addValue(indoorStats.temp, &x, &y, 0, 25, "C");
@@ -94,8 +94,8 @@ void showStats() {
     addValue(indoorStats.co2, &x, &y, 0, 1300, "ppm");
     addValue(indoorStats.voc, &x, &y, 0, 300, "ppb");
 
-    // outdoor stats names colunm
-    x = columnWidth * 2 + 5;
+    // Third column: outdoor stats names
+    x = columnWidth * 2 + 10;
     y = statsStartsAt;
     display.setTextColor(GxEPD_BLACK);
 
@@ -105,7 +105,7 @@ void showStats() {
         addLabel(outdoorLabels[i], &x, &y);
     }
 
-    // Second column: outdoor stats
+    // Forth column: outdoor stats values
     x = columnWidth * 3 + 5;
     y = statsStartsAt;
     addValue(outdoorStats.temp, &x, &y, 0, 0, "C");
