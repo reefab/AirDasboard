@@ -1,5 +1,17 @@
+#ifndef OFFLINE_MODE
+void updateAqicnStats() {
+    outdoorStats.global = 120;
+    outdoorStats.co = 9;
+    outdoorStats.humidity = 93;
+    outdoorStats.temp = 4;
+    outdoorStats.no2 = 19;
+    outdoorStats.o3 = 2;
+    outdoorStats.pm10 = 46;
+    outdoorStats.pm25 = 120;
+    outdoorStats.so2 = 2;
+}
+#else
 #include <ArduinoJson.h>
-
 void updateAqicnStats() {
     char url[150];
     sprintf(url, "http://api.waqi.info/feed/%s/?token=%s",
@@ -32,3 +44,4 @@ void updateAqicnStats() {
     }
     http.end();
 }
+#endif

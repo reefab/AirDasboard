@@ -1,3 +1,15 @@
+#ifndef OFFLINE_MODE
+void updateFoobotStats() {
+    indoorStats.timestamp = 1512333584;
+    indoorStats.localTime = "2017/12/03 21:39:44";
+    indoorStats.pm25 = 124;
+    indoorStats.temp = 22;
+    indoorStats.humidity = 51;
+    indoorStats.co2 = 1399;
+    indoorStats.voc = 386;
+    indoorStats.global = 128;
+}
+#else
 void updateFoobotStats() {
     char url[100];
     sprintf(url, "http://api.foobot.io/v2/device/%s/datapoint/3600/last/3600/",
@@ -28,3 +40,4 @@ void updateFoobotStats() {
     Serial.println(nbRequests);
     http.end();
 }
+#endif
